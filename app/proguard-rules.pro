@@ -1,0 +1,2 @@
+-keep class com.google.zxing.** { *; }
+-keep class androidx.room.** { *; }
