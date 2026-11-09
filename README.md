@@ -1,4 +1,5 @@
 # Anon Tracker
+
 Personal UPI income ledger. Customer payments go directly to the user's existing UPI-linked bank account. The app does not collect, route, hold or initiate payments.
 
 ## Features
@@ -13,8 +14,10 @@ Personal UPI income ledger. Customer payments go directly to the user's existing
 ## Build
 JDK 17 and Gradle 8.9: `gradle :app:assembleDebug`
 
-## Secure release signing
-The release workflow requires these private GitHub Actions repository secrets: `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`. Never commit the keystore or passwords. The same private keystore must be reused for every update.
+## GitHub release
+The single-job GitHub Actions workflow builds a release APK signed with the Android Gradle plugin's debug signing identity generated on the runner. No repository signing secrets or manual secret setup are required. The workflow verifies the APK signature and publishes the APK plus source ZIP and TAR.GZ archives to GitHub Releases.
+
+**Update limitation:** GitHub-hosted runners do not retain the generated debug signing key between runs. A later APK can therefore have a different signing identity. Android may require uninstalling the previous app before installing a later release. App data stored on the device may be lost when uninstalling.
 
 ## Detection limitations
 Notification access is user-authorized. Matching is heuristic and depends on supported UPI app notification formats. A notification is not proof of settlement; detected entries are PENDING until verified against the bank or UPI app. SMS and email are not accessed.
