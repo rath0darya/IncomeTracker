@@ -7,7 +7,7 @@ plugins {
 android {
  namespace = "com.anontracker.personal"
  compileSdk = 35
- defaultConfig { applicationId = "com.anontracker.personal"; minSdk = 26; targetSdk = 35; versionCode = 2; versionName = "1.0.1" }
+ defaultConfig { applicationId = "com.anontracker.personal"; minSdk = 26; targetSdk = 35; versionCode = 3; versionName = "1.0.2" }
  buildTypes {
   debug { }
   release {
