@@ -61,19 +61,46 @@ class MainActivity : ComponentActivity() {
      Column(Modifier.fillMaxSize().padding(WindowInsets.systemBars.asPaddingValues())) {
       Row(Modifier.fillMaxWidth().padding(horizontal=20.dp,vertical=13.dp),verticalAlignment=Alignment.CenterVertically) {
        Box(Modifier.size(39.dp).clip(RoundedCornerShape(13.dp)).background(Brush.linearGradient(listOf(p.accent,p.violet))),contentAlignment=Alignment.Center) { Icon(Icons.Rounded.Terminal,null,tint=Color(0xFF07151A),modifier=Modifier.size(23.dp)) }
-       Column(Modifier.weight(1f).padding(start=11.dp)) { Text("ANON / TRACKER",color=p.text,fontSize=12.sp,fontWeight=FontWeight.Black,letterSpacing=1.8.sp); Text("PERSONAL FINANCE CONSOLE",color=p.muted,fontSize=8.sp,letterSpacing=1.1.sp) }
+       Column(Modifier.weight(1f).padding(start=11.dp)) { Text("ANON TRACKER",color=p.text,fontSize=12.sp,fontWeight=FontWeight.Black,letterSpacing=1.8.sp); Text("PERSONAL FINANCE CONSOLE",color=p.muted,fontSize=8.sp,letterSpacing=1.1.sp) }
        Surface(shape=CircleShape,color=p.accentSoft,border=BorderStroke(1.dp,p.accent.copy(alpha=.35f))) { Text("● SECURE MODE",color=p.accent,fontSize=8.sp,fontWeight=FontWeight.Bold,modifier=Modifier.padding(horizontal=10.dp,vertical=7.dp)) }
       }
       Text(listOf("Command Center","Transaction Log","Income Analytics","System Settings")[tab],color=p.text,fontSize=23.sp,fontWeight=FontWeight.Bold,letterSpacing=(-.8).sp,modifier=Modifier.padding(horizontal=20.dp,vertical=5.dp))
-      when(tab) {
-       0 -> Home(upi,payee,entries,session,p,{tab=3}) { session=!session; prefs.edit().putBoolean("qr_session_active",session).apply() }
-       1 -> Ledger(entries,p,{add=true}) { item -> lifecycleScope.launch { dao.update(item.copy(status="CONFIRMED")) } }
-       2 -> Insights(entries,p)
-       3 -> Prefs(upi,payee,dark,p,{upi=it;prefs.edit().putString("upi",it).apply()},{payee=it;prefs.edit().putString("payee",it).apply()},{dark=it;prefs.edit().putBoolean("dark_theme",it).apply()},{startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))})
-      }
-      NavigationBar(containerColor=p.card.copy(alpha=.98f),tonalElevation=0.dp,modifier=Modifier.padding(horizontal=14.dp).clip(RoundedCornerShape(23.dp)).border(1.dp,p.border,RoundedCornerShape(23.dp))) {
+      BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
        val icons=listOf(Icons.Rounded.SpaceDashboard,Icons.Rounded.ReceiptLong,Icons.Rounded.QueryStats,Icons.Rounded.Tune)
-       listOf("Home","Ledger","Insights","Settings").forEachIndexed { i,label -> NavigationBarItem(selected=tab==i,onClick={tab=i},icon={Icon(icons[i],null,modifier=Modifier.size(21.dp))},label={Text(label,fontSize=9.sp)},colors=NavigationBarItemDefaults.colors(selectedIconColor=p.accent,selectedTextColor=p.accent,indicatorColor=p.accentSoft,unselectedIconColor=p.muted,unselectedTextColor=p.muted)) }
+       val labels=listOf("Home","Transactions","Insights","Settings")
+       if(maxWidth>=600.dp) {
+        Row(Modifier.fillMaxSize(),verticalAlignment=Alignment.CenterVertically) {
+         NavigationRail(containerColor=p.card.copy(alpha=.98f),modifier=Modifier.padding(end=12.dp).clip(RoundedCornerShape(22.dp)).border(1.dp,p.border,RoundedCornerShape(22.dp))) {
+          labels.forEachIndexed { i,label ->
+           NavigationRailItem(selected=tab==i,onClick={tab=i},icon={Icon(icons[i],null,modifier=Modifier.size(21.dp))},label={Text(label,fontSize=9.sp)},alwaysShowLabel=true,colors=NavigationRailItemDefaults.colors(selectedIconColor=p.accent,selectedTextColor=p.accent,indicatorColor=p.accentSoft,unselectedIconColor=p.muted,unselectedTextColor=p.muted))
+          }
+         }
+         Box(Modifier.weight(1f).fillMaxHeight()) {
+          when(tab) {
+           0 -> Home(upi,payee,entries,session,p,{tab=3}) { session=!session; prefs.edit().putBoolean("qr_session_active",session).apply() }
+           1 -> Ledger(entries,p,{add=true}) { item -> lifecycleScope.launch { dao.update(item.copy(status="CONFIRMED")) } }
+           2 -> Insights(entries,p)
+           3 -> Prefs(upi,payee,dark,p,{upi=it;prefs.edit().putString("upi",it).apply()},{payee=it;prefs.edit().putString("payee",it).apply()},{dark=it;prefs.edit().putBoolean("dark_theme",it).apply()},{startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))})
+          }
+         }
+        }
+       } else {
+        Column(Modifier.fillMaxSize()) {
+         Box(Modifier.weight(1f).fillMaxWidth()) {
+          when(tab) {
+           0 -> Home(upi,payee,entries,session,p,{tab=3}) { session=!session; prefs.edit().putBoolean("qr_session_active",session).apply() }
+           1 -> Ledger(entries,p,{add=true}) { item -> lifecycleScope.launch { dao.update(item.copy(status="CONFIRMED")) } }
+           2 -> Insights(entries,p)
+           3 -> Prefs(upi,payee,dark,p,{upi=it;prefs.edit().putString("upi",it).apply()},{payee=it;prefs.edit().putString("payee",it).apply()},{dark=it;prefs.edit().putBoolean("dark_theme",it).apply()},{startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))})
+          }
+         }
+         NavigationBar(containerColor=p.card.copy(alpha=.98f),tonalElevation=0.dp,modifier=Modifier.padding(horizontal=14.dp).clip(RoundedCornerShape(23.dp)).border(1.dp,p.border,RoundedCornerShape(23.dp))) {
+          labels.forEachIndexed { i,label ->
+           NavigationBarItem(selected=tab==i,onClick={tab=i},icon={Icon(icons[i],null,modifier=Modifier.size(21.dp))},label={Text(label,fontSize=9.sp)},colors=NavigationBarItemDefaults.colors(selectedIconColor=p.accent,selectedTextColor=p.accent,indicatorColor=p.accentSoft,unselectedIconColor=p.muted,unselectedTextColor=p.muted))
+          }
+         }
+        }
+       }
       }
       Text("DEVELOPED WITH ♥ ANONVOX",color=p.muted,fontSize=8.sp,letterSpacing=1.6.sp,modifier=Modifier.align(Alignment.CenterHorizontally).padding(top=8.dp,bottom=5.dp))
      }
@@ -102,7 +129,7 @@ class MainActivity : ComponentActivity() {
   } }
   item { Panel(p) {
    Row(verticalAlignment=Alignment.CenterVertically) {
-    Column(Modifier.weight(1f)) { Eyebrow("Payment interface / 01",p); Text("Your UPI QR",color=p.text,fontSize=17.sp,fontWeight=FontWeight.Bold) }
+    Column(Modifier.weight(1f)) { Eyebrow("Payment interface 01",p); Text("Your UPI QR",color=p.text,fontSize=17.sp,fontWeight=FontWeight.Bold) }
     Surface(color=if(session)p.accentSoft else p.raised,shape=CircleShape) { Text(if(session)"● LIVE" else "○ STANDBY",color=if(session)p.accent else p.muted,fontSize=8.sp,fontWeight=FontWeight.Bold,modifier=Modifier.padding(horizontal=10.dp,vertical=7.dp)) }
    }
    Spacer(Modifier.height(13.dp))
@@ -164,7 +191,7 @@ private fun qr(value:String):Bitmap {
  LazyColumn(Modifier.fillMaxSize().padding(horizontal=17.dp),verticalArrangement=Arrangement.spacedBy(3.dp),contentPadding=PaddingValues(bottom=12.dp)) {
   item { Metric("Today",day,p,Icons.Rounded.Today) }; item { Metric("Last 7 days",week,p,Icons.Rounded.DateRange) }; item { Metric("This month",month,p,Icons.Rounded.CalendarMonth) }
   item { Panel(p) {
-   Eyebrow("Hourly distribution / 24H",p); Text("Income activity",color=p.text,fontSize=15.sp,fontWeight=FontWeight.Bold,modifier=Modifier.padding(top=5.dp))
+   Eyebrow("Hourly distribution 24H",p); Text("Income activity",color=p.text,fontSize=15.sp,fontWeight=FontWeight.Bold,modifier=Modifier.padding(top=5.dp))
    val bars=(0..23).map { hour -> valid.filter { Calendar.getInstance().apply { timeInMillis=it.receivedAt }.get(Calendar.HOUR_OF_DAY)==hour }.sumOf { it.amount } }; val max=(bars.maxOrNull()?:0.0).coerceAtLeast(1.0)
    Row(Modifier.fillMaxWidth().height(126.dp).padding(top=14.dp),horizontalArrangement=Arrangement.spacedBy(3.dp),verticalAlignment=Alignment.Bottom) { bars.forEach { value -> Box(Modifier.weight(1f).fillMaxHeight((value/max).toFloat().coerceAtLeast(if(value>0).06f else .025f)).clip(RoundedCornerShape(topStart=4.dp,topEnd=4.dp)).background(if(value>0) Brush.verticalGradient(listOf(p.accent,p.violet)) else Brush.verticalGradient(listOf(p.raised,p.raised)))) } }
    Row(Modifier.fillMaxWidth().padding(top=7.dp),horizontalArrangement=Arrangement.SpaceBetween) { Text("00:00",color=p.muted,fontSize=8.sp); Text("12:00",color=p.muted,fontSize=8.sp); Text("23:00",color=p.muted,fontSize=8.sp) }
@@ -182,20 +209,20 @@ private fun qr(value:String):Bitmap {
  val fields=OutlinedTextFieldDefaults.colors(focusedTextColor=p.text,unfocusedTextColor=p.text,focusedBorderColor=p.accent,unfocusedBorderColor=p.border,focusedLabelColor=p.accent,unfocusedLabelColor=p.muted,cursorColor=p.accent,focusedContainerColor=p.raised,unfocusedContainerColor=p.raised)
  LazyColumn(Modifier.fillMaxSize().padding(horizontal=17.dp),verticalArrangement=Arrangement.spacedBy(3.dp),contentPadding=PaddingValues(bottom=12.dp)) {
   item { Panel(p) {
-   Eyebrow("Payment identity / 01",p); Text("UPI configuration",color=p.text,fontSize=16.sp,fontWeight=FontWeight.Bold,modifier=Modifier.padding(top=5.dp,bottom=8.dp))
+   Eyebrow("Payment identity 01",p); Text("UPI configuration",color=p.text,fontSize=16.sp,fontWeight=FontWeight.Bold,modifier=Modifier.padding(top=5.dp,bottom=8.dp))
    OutlinedTextField(name,{name=it},label={Text("Payee name")},singleLine=true,modifier=Modifier.fillMaxWidth(),colors=fields,shape=RoundedCornerShape(13.dp))
    Spacer(Modifier.height(9.dp)); OutlinedTextField(u,{u=it},label={Text("UPI ID")},singleLine=true,modifier=Modifier.fillMaxWidth(),colors=fields,shape=RoundedCornerShape(13.dp))
    Button(onClick={onPayee(name.trim());onUpi(u.trim())},modifier=Modifier.fillMaxWidth().padding(top=12.dp).height(47.dp),shape=RoundedCornerShape(13.dp)) { Icon(Icons.Rounded.Sync,null,modifier=Modifier.size(17.dp)); Spacer(Modifier.width(7.dp)); Text("SAVE & REGENERATE QR",fontSize=9.sp,fontWeight=FontWeight.Bold) }
   } }
   item { Panel(p) {
-   Eyebrow("Appearance / 02",p); Row(Modifier.fillMaxWidth().padding(top=9.dp),verticalAlignment=Alignment.CenterVertically) {
+   Eyebrow("Appearance 02",p); Row(Modifier.fillMaxWidth().padding(top=9.dp),verticalAlignment=Alignment.CenterVertically) {
     Box(Modifier.size(39.dp).clip(RoundedCornerShape(12.dp)).background(p.accentSoft),contentAlignment=Alignment.Center) { Icon(if(dark)Icons.Rounded.DarkMode else Icons.Rounded.LightMode,null,tint=p.accent) }
     Column(Modifier.weight(1f).padding(start=11.dp)) { Text(if(dark)"Cyber night" else "Clean light",color=p.text,fontWeight=FontWeight.Bold,fontSize=12.sp); Text(if(dark)"Deep graphite · neon mint" else "Porcelain · emerald",color=p.muted,fontSize=9.sp) }
     Switch(checked=dark,onCheckedChange=onTheme,colors=SwitchDefaults.colors(checkedThumbColor=p.accent,checkedTrackColor=p.accentSoft))
    }
   } }
   item { Panel(p) {
-   Eyebrow("Detection engine / 03",p); Text("Payment notifications",color=p.text,fontSize=14.sp,fontWeight=FontWeight.Bold,modifier=Modifier.padding(top=5.dp))
+   Eyebrow("Detection engine 03",p); Text("Payment notifications",color=p.text,fontSize=14.sp,fontWeight=FontWeight.Bold,modifier=Modifier.padding(top=5.dp))
    Text("Supported UPI and bank alerts are matched only while a QR session is active. Every match stays pending until you verify it in your payment app.",color=p.muted,fontSize=10.sp,lineHeight=16.sp,modifier=Modifier.padding(top=6.dp))
    OutlinedButton(onClick=access,modifier=Modifier.fillMaxWidth().padding(top=11.dp),shape=RoundedCornerShape(12.dp)) { Icon(Icons.Rounded.NotificationsActive,null,modifier=Modifier.size(17.dp)); Spacer(Modifier.width(7.dp)); Text("CONFIGURE NOTIFICATION ACCESS",fontSize=9.sp) }
   } }
@@ -210,7 +237,7 @@ private fun qr(value:String):Bitmap {
   Column(verticalArrangement=Arrangement.spacedBy(8.dp)) {
    OutlinedTextField(amount,{amount=it},label={Text("Amount ₹")},singleLine=true,modifier=Modifier.fillMaxWidth(),colors=fields)
    OutlinedTextField(payer,{payer=it},label={Text("Received from")},singleLine=true,modifier=Modifier.fillMaxWidth(),colors=fields)
-   OutlinedTextField(note,{note=it},label={Text("Work / note")},modifier=Modifier.fillMaxWidth(),colors=fields)
+   OutlinedTextField(note,{note=it},label={Text("Work note")},modifier=Modifier.fillMaxWidth(),colors=fields)
   }
  },confirmButton={Button(onClick={val a=amount.toDoubleOrNull();if(a!=null&&a>0&&payer.isNotBlank())save(a,payer.trim(),note.trim())},enabled=(amount.toDoubleOrNull()?:0.0)>0&&payer.isNotBlank()){Text("SAVE")}},dismissButton={TextButton(onClick=close){Text("CANCEL")}})
 }
